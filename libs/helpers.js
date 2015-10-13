@@ -100,5 +100,5 @@ function m_to_mi(distance) {
 
 
 function formatFuelCost(fuelCost) {
-  return '$' + fuelCost.toFixed(2);
+  return fuelCost ? '$' + fuelCost.toFixed(2) : '';
 }
