@@ -1,6 +1,6 @@
 {
   "name": "TripViewer",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Automatic REST API Demo Application",
   "author": {
     "name": "Brendan Nee",
@@ -16,31 +16,31 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "async": "~1.2.1",
-    "body-parser": "~1.13.1",
-    "bower": "~1.4.1",
+    "async": "~1.4.2",
+    "body-parser": "~1.14.1",
+    "bower": "~1.5.3",
     "debug": "~2.2.0",
-    "express": "~4.13.0",
+    "express": "~4.13.3",
     "express-csv": "~0.6.0",
     "express-session": "~1.11.3",
     "gulp": "~3.9.0",
-    "gulp-load-plugins": "~0.10.0",
+    "gulp-load-plugins": "~1.0.0-rc",
     "jade": "~1.11.0",
-    "moment-timezone": "~0.4.0",
-    "morgan": "~1.6.0",
-    "nconf": "~0.7.1",
-    "passport": "~0.2.2",
+    "moment-timezone": "~0.4.1",
+    "morgan": "~1.6.1",
+    "nconf": "~0.8.2",
+    "passport": "~0.3.0",
     "passport-automatic": "~1.2.1",
-    "request": "~2.58.0",
+    "request": "~2.65.0",
     "serve-favicon": "~2.3.0",
     "underscore": "~1.8.3"
   },
   "devDependencies": {
-    "gulp-nodemon": "~2.0.3",
-    "gulp-jshint": "~1.11.0"
+    "gulp-nodemon": "~2.0.4",
+    "gulp-jshint": "~1.11.2"
   },
   "engines": {
-    "node": "0.12.x"
+    "node": "4.x"
   },
   "scripts": {
     "start": "node ./bin/www",
