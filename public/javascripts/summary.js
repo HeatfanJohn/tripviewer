@@ -1,5 +1,5 @@
-var trips,
-    weekly;
+var trips;
+var weekly;
 
 fetchTrips(processTrips);
 
@@ -49,11 +49,11 @@ function processTrips(trips) {
 
 
 function prepData(type) {
-  var graphData = {},
-      formatter;
+  var graphData = {};
+  var formatter;
   if (type === 'distance') {
     formatter = function(d) {
-      return parseFloat(formatDistance(m_to_mi(d.values.distance_m)));
+      return parseFloat(formatDistance(mToMi(d.values.distance_m)));
     };
     graphData.yAxisLabel = 'Distance (mi)';
     graphData.unitFomatter = function(d) { return d.value + ' miles'; };
@@ -97,93 +97,93 @@ function prepData(type) {
 function drawGraph(graphData) {
   $('#graphs .graph').empty();
 
-  var margin = {top: 20, right: 40, bottom: 30, left: 50},
-      width = 600 - margin.left - margin.right,
-      height = 222 - margin.top - margin.bottom,
-      bisectDate = d3.bisector(function(d) { return d.key; }).left;
+  var margin = {top: 20, right: 40, bottom: 30, left: 50};
+  var width = 600 - margin.left - margin.right;
+  var height = 222 - margin.top - margin.bottom;
+  var bisectDate = d3.bisector(function(d) { return d.key; }).left;
 
   var x = d3.time.scale()
-      .domain([_.first(graphData.data).key, _.last(graphData.data).key])
-      .range([0, width]);
+    .domain([_.first(graphData.data).key, _.last(graphData.data).key])
+    .range([0, width]);
 
   var y = d3.scale.linear()
-      .range([height, 0])
-      .domain([0, d3.max(_.pluck(graphData.data, 'value'))]);
+    .range([height, 0])
+    .domain([0, d3.max(_.pluck(graphData.data, 'value'))]);
 
   var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient('bottom')
-      .ticks(d3.time.month)
-      .tickFormat(d3.time.format("%b"));
+    .scale(x)
+    .orient('bottom')
+    .ticks(d3.time.month)
+    .tickFormat(d3.time.format('%b'));
 
   var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient('left')
-      .ticks(8);
+    .scale(y)
+    .orient('left')
+    .ticks(8);
 
   var line = d3.svg.line()
-      //.interpolate('cardinal')
-      .x(function(d) { return x(d.key); })
-      .y(function(d) { return y(d.value); });
+    // .interpolate('cardinal')
+    .x(function(d) { return x(d.key); })
+    .y(function(d) { return y(d.value); });
 
   var svg = d3.select('#graphs .graph').append('svg')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
     .append('g')
-      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
   svg.append('g')
-      .attr('class', 'x axis')
-      .attr('transform', 'translate(0,' + height + ')')
-      .call(xAxis);
+    .attr('class', 'x axis')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(xAxis);
 
   svg.append('g')
-      .attr('class', 'y axis')
-      .call(yAxis)
+    .attr('class', 'y axis')
+    .call(yAxis)
     .append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('y', 6)
-      .attr('dy', '-3.2em')
-      .style('text-anchor', 'end')
-      .text(graphData.yAxisLabel);
+    .attr('transform', 'rotate(-90)')
+    .attr('y', 6)
+    .attr('dy', '-3.2em')
+    .style('text-anchor', 'end')
+    .text(graphData.yAxisLabel);
 
   svg.append('path')
-      .datum(graphData.data)
-      .attr('class', 'line')
-      .attr('d', line);
+    .datum(graphData.data)
+    .attr('class', 'line')
+    .attr('d', line);
 
   var focus = svg.append('g')
-      .attr('class', 'focus')
-      .style('display', 'none');
+    .attr('class', 'focus')
+    .style('display', 'none');
 
   focus.append('circle')
-      .attr('r', 4.5);
+    .attr('r', 4.5);
 
   focus.append('text')
-      .attr('class', 'value')
-      .attr('x', 9)
-      .attr('dy', '.35em');
+    .attr('class', 'value')
+    .attr('x', 9)
+    .attr('dy', '.35em');
 
   focus.append('text')
-      .attr('class', 'key')
-      .attr('x', 9)
-      .attr('dy', '1.3em');
+    .attr('class', 'key')
+    .attr('x', 9)
+    .attr('dy', '1.3em');
 
   svg.append('rect')
-      .attr('class', 'overlay')
-      .attr('width', width)
-      .attr('height', height)
-      .on('mouseover', function() { focus.style('display', null); })
-      .on('mouseout', function() { focus.style('display', 'none'); })
-      .on('mousemove', mousemove);
+    .attr('class', 'overlay')
+    .attr('width', width)
+    .attr('height', height)
+    .on('mouseover', function() { focus.style('display', null); })
+    .on('mouseout', function() { focus.style('display', 'none'); })
+    .on('mousemove', mousemove);
 
   function mousemove() {
-    var x0 = x.invert(d3.mouse(this)[0]),
-        i = bisectDate(graphData.data, x0),
-        d0 = graphData.data[i - 1],
-        d1 = graphData.data[i];
+    var x0 = x.invert(d3.mouse(this)[0]);
+    var i = bisectDate(graphData.data, x0);
+    var d0 = graphData.data[i - 1];
+    var d1 = graphData.data[i];
 
-    var d = (!d0 || x0 - d0.key > d1.key - x0) ? d1 : d0;
+    var d = !d0 || x0 - d0.key > d1.key - x0 ? d1 : d0;
     focus.attr('transform', 'translate(' + x(d.key) + ',' + y(d.value) + ')');
     focus.select('text.value').html(graphData.unitFomatter(d));
     focus.select('text.key').html(moment(d.key).format('MMM D, YYYY'));

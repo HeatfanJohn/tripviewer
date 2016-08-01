@@ -1,32 +1,52 @@
-var _ = require('underscore'),
-    moment = require('moment-timezone');
+const _ = require('underscore');
+const moment = require('moment-timezone');
 
 
-exports.filterTrips = function(trips, trip_ids) {
-  return _.filter(trips, function(trip) {
-    return trip_ids.indexOf(trip.id) != -1;
+function formatVehicle(v) {
+  if (!v) {
+    return '';
+  }
+
+  return [v.year || '', v.make || '', v.model || ''].join(' ');
+}
+
+
+function mToMi(distance) {
+  // Convert from m to mi
+  return (distance / 1609.34).toFixed(2);
+}
+
+
+function formatFuelCost(fuelCost) {
+  return fuelCost ? `$${fuelCost.toFixed(2)}` : '';
+}
+
+
+exports.filterTrips = (trips, tripIds) => {
+  return _.filter(trips, (trip) => {
+    return tripIds.indexOf(trip.id) !== -1;
   });
 };
 
 
-exports.sortByDate = function(trips) {
-  return _.sortBy(trips, function(trip) {
+exports.sortByDate = (trips) => {
+  return _.sortBy(trips, (trip) => {
     return -moment(trip.started_at).valueOf();
   });
 };
 
 
-exports.mergeTripsAndVehicles = function(trips, vehicles) {
-  var vehicleObj = _.object(_.pluck(vehicles, 'url'), vehicles);
+exports.mergeTripsAndVehicles = (trips, vehicles) => {
+  const vehicleObj = _.object(_.pluck(vehicles, 'url'), vehicles);
 
-  return trips.map(function(trip) {
+  return trips.map((trip) => {
     trip.vehicle = vehicleObj[trip.vehicle];
     return trip;
   });
 };
 
 
-exports.fieldNames = function() {
+exports.fieldNames = () => {
   return [
     'Vehicle',
     'Start Location Name',
@@ -55,21 +75,21 @@ exports.fieldNames = function() {
 };
 
 
-exports.tripToArray = function(t) {
+exports.tripToArray = (t) => {
   return [
     formatVehicle(t.vehicle),
-    (t.start_address) ? t.start_address.name : '',
+    t.start_address ? t.start_address.name : '',
     t.start_location.lat,
     t.start_location.lon,
     t.start_location.accuracy_m,
     t.started_at,
-    (t.end_address) ? t.end_address.name : '',
+    t.end_address ? t.end_address.name : '',
     t.end_location.lat,
     t.end_location.lon,
     t.end_location.accuracy_m,
     t.ended_at,
     t.path,
-    m_to_mi(t.distance_m),
+    mToMi(t.distance_m),
     t.duration_s,
     t.hard_accels,
     t.hard_brakes,
@@ -82,23 +102,3 @@ exports.tripToArray = function(t) {
     t.tags.join(',')
   ];
 };
-
-
-function formatVehicle(v) {
-  if(!v) {
-    return '';
-  } else {
-    return [(v.year || ''), (v.make || ''), (v.model || '')].join(' ');
-  }
-}
-
-
-function m_to_mi(distance) {
-  //convert from m to mi
-  return (distance / 1609.34).toFixed(2);
-}
-
-
-function formatFuelCost(fuelCost) {
-  return fuelCost ? '$' + fuelCost.toFixed(2) : '';
-}

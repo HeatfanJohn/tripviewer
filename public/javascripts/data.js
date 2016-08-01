@@ -1,6 +1,6 @@
 function fetchTrips(cb) {
   var ts = sessionStorage.getItem('ts');
-  if(ts < Date.now() - (60*60*1000)) {
+  if (ts < Date.now() - 60 * 60 * 1000) {
     showLoading();
     $.getJSON('/api/trips/')
       .done(function(results) {
@@ -16,16 +16,16 @@ function fetchTrips(cb) {
 }
 
 
-function fetchTrip(trip_id, cb) {
-  var cached = sessionStorage.getItem(trip_id);
-  if(cached) {
+function fetchTrip(tripId, cb) {
+  var cached = sessionStorage.getItem(tripId);
+  if (cached) {
     cb(JSON.parse(cached));
   } else {
     showLoading();
-    $.getJSON('/api/trips/' + trip_id)
+    $.getJSON('/api/trips/' + tripId)
       .done(function(data) {
         hideLoading();
-        if(data) {
+        if (data) {
           cb(formatTrip(data));
         } else {
           showAlert('No trips found', 'warning');
@@ -38,55 +38,55 @@ function fetchTrip(trip_id, cb) {
 }
 
 
-function tagTrip(trip_id, tag) {
+function tagTrip(tripId, tag) {
   $.post(
-    '/api/trips/' + trip_id + '/tag',
+    '/api/trips/' + tripId + '/tag',
     {tag: tag}
   )
-  .done(function(data) {
-    if(data) {
-      var cached = getCachedTrips(trip_id);
-      if(cached.tags) {
-        console.log(cached.tags);
-        cached.tags = _.union([tag], cached.tags);
-        console.log(cached.tags);
-        cached.business_tag = 'checked';
-        cacheTrip(cached);
+    .done(function(data) {
+      if (data) {
+        var cached = getCachedTrips(tripId);
+        if (cached.tags) {
+          console.log(cached.tags);
+          cached.tags = _.union([tag], cached.tags);
+          console.log(cached.tags);
+          cached.business_tag = 'checked';
+          cacheTrip(cached);
+        }
+        hideAlert();
+      } else {
+        showAlert('Unable to tag trip', 'danger');
       }
-      hideAlert();
-    } else {
-      showAlert('Unable to tag trip', 'danger');
-    }
-  })
-  .fail(function(jqhxr, textStatus, error) {
-    showAlert('Unable to tag trip (' + jqhxr.status + ' ' + error + ')', 'danger');
-  });
+    })
+    .fail(function(jqhxr, textStatus, error) {
+      showAlert('Unable to tag trip (' + jqhxr.status + ' ' + error + ')', 'danger');
+    });
 }
 
 
-function untagTrip(trip_id, tag) {
+function untagTrip(tripId, tag) {
   $.ajax({
-    url: '/api/trips/' + trip_id + '/tag/' + tag,
+    url: '/api/trips/' + tripId + '/tag/' + tag,
     type: 'DELETE'
   })
-  .done(function(data) {
-    var cached = getCachedTrips(trip_id);
-    if(cached) {
-      cached.tags = _.without(cached.tags, tag);
-      cached.business_tag = '';
-      cacheTrip(cached);
-    }
-    hideAlert();
-  })
-  .fail(function(jqhxr, textStatus, error) {
-    showAlert('Unable to untag trip (' + jqhxr.status + ' ' + error + ')', 'danger');
-  });
+    .done(function() {
+      var cached = getCachedTrips(tripId);
+      if (cached) {
+        cached.tags = _.without(cached.tags, tag);
+        cached.business_tag = '';
+        cacheTrip(cached);
+      }
+      hideAlert();
+    })
+    .fail(function(jqhxr, textStatus, error) {
+      showAlert('Unable to untag trip (' + jqhxr.status + ' ' + error + ')', 'danger');
+    });
 }
 
 
 function fetchVehicles(cb) {
   var vehicles = JSON.parse(sessionStorage.getItem('vehicles') || '[]');
-  if(vehicles.length) {
+  if (vehicles.length) {
     cb(vehicles);
   } else {
     showLoading();
@@ -125,16 +125,17 @@ function cacheVehicles(vehicles) {
 }
 
 
-function getCachedTrips(trip_id) {
-  if(trip_id) {
-    // get specific cached trip
-    return JSON.parse(sessionStorage.getItem(trip_id) || '{}');
+function getCachedTrips(tripId) {
+  if (tripId) {
+    // Get specific cached trip
+    return JSON.parse(sessionStorage.getItem(tripId) || '{}');
   } else {
     // get all cached trips
     var order = JSON.parse(sessionStorage.getItem('order') || '[]');
-    return order.map(function(trip_id) { return JSON.parse(sessionStorage.getItem(trip_id) || {}); });
+    return order.map(function(tripId) {
+      return JSON.parse(sessionStorage.getItem(tripId) || {});
+    });
   }
-
 }
 
 
@@ -144,7 +145,7 @@ function clearCache() {
 
 
 function formatTrip(trip) {
-  if(!trip.vehicle) {
+  if (!trip.vehicle) {
     trip.vehicle = {};
   }
 
@@ -159,16 +160,16 @@ function formatTrip(trip) {
     ended_at_time: formatTime(trip.ended_at, trip.end_timezone),
     ended_at_date: formatDate(trip.ended_at, trip.end_timezone),
     duration: formatDuration(trip.duration_s),
-    distance: formatDistance(m_to_mi(trip.distance_m)),
+    distance: formatDistance(mToMi(trip.distance_m)),
     average_mpg: formatMPG(trip.average_kmpl),
     fuel_cost_usd: formatFuelCost(trip.fuel_cost_usd),
-    hard_brakes_class: (trip.hard_brakes > 0 ? 'someHardBrakes' : 'noHardBrakes'),
+    hard_brakes_class: trip.hard_brakes > 0 ? 'someHardBrakes' : 'noHardBrakes',
     hard_brakes: trip.hard_brakes || '<i class="glyphicon glyphicon-ok"></i>',
-    hard_accels_class: (trip.hard_accels > 0 ? 'someHardAccels' : 'noHardAccels'),
+    hard_accels_class: trip.hard_accels > 0 ? 'someHardAccels' : 'noHardAccels',
     hard_accels: trip.hard_accels || '<i class="glyphicon glyphicon-ok"></i>',
     speeding_class: getSpeedingClass(trip.duration_over_70_s),
     speeding: formatSpeeding(trip.duration_over_70_s),
-    fuel_volume_usgal: l_to_usgal(trip.fuel_volume_l),
+    fuel_volume_usgal: lToUsgal(trip.fuel_volume_l),
     business_tag: _.contains(trip.tags, 'business') ? 'checked' : ''
   });
 }

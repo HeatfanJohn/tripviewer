@@ -1,11 +1,11 @@
 _.templateSettings = {
-  interpolate : /\{\{(.+?)\}\}/g
+  interpolate: /\{\{(.+?)\}\}/g
 };
 
 var tripTemplate = _.template($('#singleTrip').html());
 
-if(trip_id) {
-  fetchTrip(trip_id, renderTrip);
+if (tripId) {
+  fetchTrip(tripId, renderTrip);
 }
 
 
@@ -16,9 +16,9 @@ function renderTrip(trip) {
 
 
 $('#trip').on('change', '.business-tag input', function() {
-  if($(this).is(':checked')) {
-    tagTrip(trip_id, 'business');
+  if ($(this).is(':checked')) {
+    tagTrip(tripId, 'business');
   } else {
-    untagTrip(trip_id, 'business');
+    untagTrip(tripId, 'business');
   }
 });

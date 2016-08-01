@@ -1,52 +1,52 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var bodyParser = require('body-parser');
-var nconf = require('nconf');
-var session = require('express-session');
-var passport = require('passport');
-var AutomaticStrategy = require('passport-automatic').Strategy;
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
+const nconf = require('nconf');
+const session = require('express-session');
+const passport = require('passport');
+const AutomaticStrategy = require('passport-automatic').Strategy;
 
 nconf.env().argv();
 nconf.file('./config.json');
 
 nconf.set('API_URL', 'https://api.automatic.com');
 
-var routes = require('./routes');
-var api = require('./routes/api');
+const routes = require('./routes');
+const api = require('./routes/api');
 
-var app = express();
+const app = express();
 
 
 // Use the AutomaticStrategy within Passport
 passport.use(new AutomaticStrategy({
-    clientID: nconf.get('AUTOMATIC_CLIENT_ID'),
-    clientSecret: nconf.get('AUTOMATIC_CLIENT_SECRET'),
-		scope: ['scope:trip', 'scope:location', 'scope:vehicle:profile', 'scope:vehicle:events', 'scope:behavior']
-  },
-  function(accessToken, refreshToken, profile, done) {
-		profile.accessToken = accessToken;
+  clientID: nconf.get('AUTOMATIC_CLIENT_ID'),
+  clientSecret: nconf.get('AUTOMATIC_CLIENT_SECRET'),
+  scope: ['scope:trip', 'scope:location', 'scope:vehicle:profile', 'scope:vehicle:events', 'scope:behavior']
+},
+  (accessToken, refreshToken, profile, done) => {
+    profile.accessToken = accessToken;
     return done(null, profile);
   }
 ));
 
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser((user, done) => {
   done(null, user);
 });
 
 
-passport.deserializeUser(function(obj, done) {
+passport.deserializeUser((obj, done) => {
   done(null, obj);
 });
 
 
-// view engine setup
+// View engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
-app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(favicon(`${__dirname}/public/favicon.ico`));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -61,9 +61,9 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 if (app.get('env') !== 'development') {
-	app.all('*', routes.force_https);
+  app.all('*', routes.force_https);
 } else {
-	app.all('*', routes.check_dev_token);
+  app.all('*', routes.check_dev_token);
 }
 
 app.get('/', routes.ensureAuthenticated, routes.index);

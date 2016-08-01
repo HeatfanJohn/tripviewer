@@ -19,9 +19,9 @@ function hideAlert() {
 
 
 function formatDuration(s) {
-  var duration = moment.duration(s, 'seconds'),
-      hours = (duration.asHours() >= 1) ? Math.floor(duration.asHours()) + ' h ' : '',
-      minutes = duration.minutes() + ' min';
+  var duration = moment.duration(s, 'seconds');
+  var hours = duration.asHours() >= 1 ? Math.floor(duration.asHours()) + ' h ' : '';
+  var minutes = duration.minutes() + ' min';
   return hours + minutes;
 }
 
@@ -37,48 +37,48 @@ function formatDurationHours(s) {
 
 
 function formatSpeeding(s) {
-  if(!s || s < 30) {
+  if (!s || s < 30) {
     return '<i class="glyphicon glyphicon-ok"></i>';
-  } else if((s / 60) > 60) {
+  } else if (s / 60 > 60) {
     return moment.duration(s, 'seconds').asHours().toFixed(1);
-  } else {
-    return formatDurationMinutes(s);
   }
+
+  return formatDurationMinutes(s);
 }
 
 
 function getSpeedingClass(s) {
-  if(!s || s < 30) {
+  if (!s || s < 30) {
     return 'noSpeeding';
-  } else if((s / 60) > 60) {
+  } else if (s / 60 > 60) {
     return 'someSpeedingHours';
-  } else {
-    return 'someSpeedingMinutes';
   }
+
+  return 'someSpeedingMinutes';
 }
 
 
-function m_to_mi(distance_m) {
-  return distance_m / 1609.34;
+function mToMi(distanceM) {
+  return distanceM / 1609.34;
 }
 
 
-function l_to_usgal(volume_l) {
-  return volume_l * 0.264172;
+function lToUsgal(volumeL) {
+  return volumeL * 0.264172;
 }
 
 
-function kmpl_to_mpg(kmpl) {
+function kmplToMpg(kmpl) {
   return kmpl * 2.35214583;
 }
 
 
 function formatDistance(distance) {
-  if(Math.round(distance) >= 100) {
+  if (Math.round(distance) >= 100) {
     return distance.toFixed(0);
-  } else {
-    return (distance || 0).toFixed(1);
   }
+
+  return (distance || 0).toFixed(1);
 }
 
 
@@ -93,17 +93,17 @@ function formatFuelVolume(fuelVolume) {
 
 
 function formatMPG(kmpl) {
-  var mpg = kmpl_to_mpg(kmpl);
-  return (mpg) ? mpg.toFixed(1) : '';
+  var mpg = kmplToMpg(kmpl);
+  return mpg ? mpg.toFixed(1) : '';
 }
 
 
 function cleanAddress(address) {
-  if(!address) {
+  if (!address) {
     address = {};
   }
 
-  address.cleaned = (address && address.name) ? address.name.replace(/\d+, USA/gi, '') : '';
+  address.cleaned = address && address.name ? address.name.replace(/\d+, USA/gi, '') : '';
   address.multiline = formatAddressMultiline(address.cleaned);
 
   return address;
@@ -113,7 +113,7 @@ function cleanAddress(address) {
 function formatAddressMultiline(cleaned) {
   var lines = cleaned.split(', ');
 
-  if(lines.length > 2) {
+  if (lines.length > 2) {
     var first = lines.shift();
     cleaned = first + '<br>' + lines.join(', ');
   }
@@ -124,7 +124,7 @@ function formatAddressMultiline(cleaned) {
 function formatDate(time, timezone) {
   try {
     return moment(time).tz(timezone).format('MMM D, YYYY');
-  } catch(e) {
+  } catch (e) {
     return moment(time).format('MMM D, YYYY');
   }
 }
@@ -133,7 +133,7 @@ function formatDate(time, timezone) {
 function formatTime(time, timezone) {
   try {
     return moment(time).tz(timezone).format('h:mm A');
-  } catch(e) {
+  } catch (e) {
     return moment(time).format('h:mm A');
   }
 }
@@ -142,35 +142,35 @@ function formatTime(time, timezone) {
 function formatDayOfWeek(time, timezone) {
   try {
     return moment(time).tz(timezone).format('dddd');
-  } catch(e) {
+  } catch (e) {
     return moment(time).format('dddd');
   }
 }
 
 
-function formatTripCount(trip_count) {
-  if(trip_count === 1) {
-    return trip_count + ' Trip';
-  } else {
-    return (trip_count || 0) + ' Trips';
+function formatTripCount(tripCount) {
+  if (tripCount === 1) {
+    return tripCount + ' Trip';
   }
+
+  return (tripCount || 0) + ' Trips';
 }
 
 
 function isScrolledIntoView(elem) {
-    var docViewTop = $(window).scrollTop();
-    var docViewBottom = docViewTop + $(window).height();
+  var docViewTop = $(window).scrollTop();
+  var docViewBottom = docViewTop + $(window).height();
 
-    var elemTop = $(elem).offset().top;
-    var elemBottom = elemTop + $(elem).height();
+  var elemTop = $(elem).offset().top;
+  var elemBottom = elemTop + $(elem).height();
 
-    return ((elemTop <= docViewBottom) && (elemBottom >= docViewTop));
+  return elemTop <= docViewBottom && elemBottom >= docViewTop;
 }
 
 
 function drawMaps() {
   $('.map').not('.leaflet-container').each(function(idx, map) {
-    if(isScrolledIntoView(map)) {
+    if (isScrolledIntoView(map)) {
       var trip = $(map).parents('.trip').data('trip');
       drawMap(trip);
     }
@@ -182,27 +182,27 @@ function drawMap(trip) {
   // Setup mapbox
   L.mapbox.accessToken = mapboxAccessToken;
 
-  var styleId = 'automatic.h5kpm228',
-      mapId = 'map' + trip.id,
-      map = L.mapbox.map(mapId, styleId),
-      start = [trip.start_location.lat, trip.start_location.lon],
-      end = [trip.end_location.lat, trip.end_location.lon],
-      lineStyle = {color: '#08b1d5', opacity: 0.9},
-      iconStyle = {
-        iconSize: [25, 41],
-        iconAnchor: [12, 40],
-        popupAnchor: [0,-41],
-        shadowUrl: '/images/marker-shadow.png',
-        shadowSize: [41, 41],
-        shadowAnchor: [12, 40]
-      },
-      aIcon = L.icon(_.extend(iconStyle, {iconUrl: '/images/marker-a.png'})),
-      bIcon = L.icon(_.extend(iconStyle, {iconUrl: '/images/marker-b.png'})),
-      startPopupContent = trip.start_address.multiline + '<br>' + trip.started_at_date + '<br>' + trip.started_at_time,
-      endPopupContent = trip.end_address.multiline + '<br>' + trip.ended_at_date + '<br>' + trip.ended_at_time,
-      line;
+  var styleId = 'automatic.h5kpm228';
+  var mapId = 'map' + trip.id;
+  var map = L.mapbox.map(mapId, styleId);
+  var start = [trip.start_location.lat, trip.start_location.lon];
+  var end = [trip.end_location.lat, trip.end_location.lon];
+  var lineStyle = {color: '#08b1d5', opacity: 0.9};
+  var iconStyle = {
+    iconSize: [25, 41],
+    iconAnchor: [12, 40],
+    popupAnchor: [0, -41],
+    shadowUrl: '/images/marker-shadow.png',
+    shadowSize: [41, 41],
+    shadowAnchor: [12, 40]
+  };
+  var aIcon = L.icon(_.extend(iconStyle, {iconUrl: '/images/marker-a.png'}));
+  var bIcon = L.icon(_.extend(iconStyle, {iconUrl: '/images/marker-b.png'}));
+  var startPopupContent = trip.start_address.multiline + '<br>' + trip.started_at_date + '<br>' + trip.started_at_time;
+  var endPopupContent = trip.end_address.multiline + '<br>' + trip.ended_at_date + '<br>' + trip.ended_at_time;
+  var line;
 
-  if(trip.path) {
+  if (trip.path) {
     line = L.polyline(polyline.decode(trip.path), lineStyle);
   } else {
     line = L.polyline([start, end], lineStyle);
@@ -230,7 +230,7 @@ function summarizeData(d) {
     fuel_volume_usgal: d3.sum(d, function(d) { return +d.fuel_volume_usgal; }),
     fuel_cost_usd: d3.sum(d, function(d) { return +d.fuel_cost_usd; })
   };
-  summary.average_mpg = m_to_mi(summary.distance_m) / summary.fuel_volume_usgal;
+  summary.average_mpg = mToMi(summary.distance_m) / summary.fuel_volume_usgal;
 
   return summary;
 }
