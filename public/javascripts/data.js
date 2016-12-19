@@ -133,7 +133,7 @@ function getCachedTrips(tripId) {
     // get all cached trips
     var order = JSON.parse(sessionStorage.getItem('order') || '[]');
     return order.map(function(tripId) {
-      return JSON.parse(sessionStorage.getItem(tripId) || {});
+      return JSON.parse(sessionStorage.getItem(tripId) || '{}');
     });
   }
 }
