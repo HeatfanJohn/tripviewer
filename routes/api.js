@@ -32,63 +32,43 @@ function downloadVehicles(req, cb) {
 
 
 function downloadAllTrips(req, cb) {
-  const uri = `${nconf.get('API_URL')}/trip/`;
+  var uri = `${nconf.get('API_URL')}/trip/`;
   const tripIds = req.query.trip_ids;
-  let trips;
+  let trips = [];
+  async.until(function(){ return !uri; }, function(cb) {
+    request.get({
+      uri: uri,
+      headers: {Authorization: 'bearer ' + req.user.accessToken},
+      json: true,
+      qs: { limit: 250 }
+    }, function(err, r, body) {
 
-  // Get first page of trips
-  request.get({
-    uri: uri,
-    headers: {Authorization: `bearer ${req.user.accessToken}`},
-    json: true,
-    qs: { limit: 25 }
-  }, (err, r, body) => {
+      if(err || body.error) {
+        cb(new Error(err || body.error));
+        return;
+      }
+
+      trips = trips.concat(body.results);
+      uri = body['_metadata'] ? body['_metadata'].next : undefined;
+
+      cb(err, body.results);
+    });
+  }, function(err, results) {
     if (err) return cb(err);
-
-    trips = body.results;
-    const count = body._metadata ? body._metadata.count : 0;
-    const pages = _.range(2, Math.ceil(count / 25) + 1);
-
-    if (count <= 25) {
-      // No more pages
-      filterAndSendTrips(trips, tripIds, cb);
-    } else {
-      // Get the next set of pages in parallel
-      async.concat(pages, (page, cb) => {
-        request.get({
-          uri: uri,
-          headers: {
-            Authorization: `bearer ${req.user.accessToken}`
-          },
-          json: true,
-          qs: {
-            limit: 25,
-            page: page
-          }
-        }, (err, r, body) => {
-          cb(err, body.results);
-        });
-      }, (err, results) => {
-        if (err) return cb(err);
-
-        trips = trips.concat(results);
-
-        filterAndSendTrips(trips, tripIds, cb);
-      });
-    }
+    trips = trips.concat(results);
+    filterAndSendTrips(trips, tripIds, cb);
   });
-}
-
+};
 
 exports.trips = (req, res, next) => {
   async.parallel([
-    (cb) => {
+      (cb) => {
       downloadAllTrips(req, cb);
-    },
-    (cb) => {
-      downloadVehicles(req, cb);
-    }
-  ], (err, data) => {
+},
+  (cb) => {
+    downloadVehicles(req, cb);
+  }
+], (err, data) => {
     if (err) return next(err);
     return res.json(helpers.mergeTripsAndVehicles(data[0], data[1]));
   });
