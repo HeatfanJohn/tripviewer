@@ -30,8 +30,12 @@ exports.filterTrips = (trips, tripIds) => {
 
 
 exports.sortByDate = (trips) => {
-  return _.sortBy(trips, (trip) => {
-    return -moment(trip.started_at).valueOf();
+  // Filter out any 'undefined' elements and then sort by trip start time
+  return _.sortBy(_.filter(trips, (trip) => {
+    if(typeof trip != 'undefined') console.log('undefinded trip encountered'); 
+    return typeof trip != 'undefined' 
+    }), (trip) => {
+      return -moment(trip.started_at).valueOf();
   });
 };
 
