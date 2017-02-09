@@ -55,7 +55,7 @@ function downloadAllTrips(req, cb) {
     });
   }, function(err, results) {
     if (err) return cb(err);
-    trips = trips.concat(results);
+//    trips = trips.concat(results); // This line duplicates the results of the last page returned
     filterAndSendTrips(trips, tripIds, cb);
   });
 };

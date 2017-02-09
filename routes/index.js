@@ -23,7 +23,8 @@ exports.ensureAuthenticated = (req, res, next) => {
 
   if (req.xhr) {
     const error = new Error('Not logged in');
-    error.setStatus(401);
+//    error.setStatus(401); // There is no setStatus method in Error
+    res.status(401);
     return next(error);
   }
   return res.redirect('/login');
